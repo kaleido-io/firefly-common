@@ -49,7 +49,6 @@ type Config struct {
 	ProxyURL                      string             `json:"proxyURL,omitempty"`
 	HTTPRequestTimeout            time.Duration      `json:"requestTimeout,omitempty"`
 	HTTPIdleConnTimeout           time.Duration      `json:"idleTimeout,omitempty"`
-	HTTPMaxIdleTimeout            time.Duration      `json:"maxIdleTimeout,omitempty"`
 	HTTPConnectionTimeout         time.Duration      `json:"connectionTimeout,omitempty"`
 	HTTPExpectContinueTimeout     time.Duration      `json:"expectContinueTimeout,omitempty"`
 	AuthUsername                  string             `json:"authUsername,omitempty"`
