@@ -115,6 +115,8 @@ type CRUD[T Resource] interface {
 	Delete(ctx context.Context, id string, hooks ...PostCompletionHook) (err error)
 	DeleteMany(ctx context.Context, filter ffapi.Filter, hooks ...PostCompletionHook) (err error) // no events
 	Scoped(scope sq.Eq) CRUD[T]                                                                   // allows dynamic scoping to a collection
+	NewFilterBuilder(ctx context.Context) ffapi.FilterBuilder
+	NewUpdateBuilder(ctx context.Context) ffapi.UpdateBuilder
 }
 
 type CrudBase[T Resource] struct {
@@ -160,6 +162,20 @@ func (c *CrudBase[T]) ModifyQuery(newModifier QueryModifier) CRUDQuery[T] {
 		return sb
 	}
 	return &cModified
+}
+
+func (c *CrudBase[T]) NewFilterBuilder(ctx context.Context) ffapi.FilterBuilder {
+	if c.QueryFactory == nil {
+		return nil
+	}
+	return c.QueryFactory.NewFilter(ctx)
+}
+
+func (c *CrudBase[T]) NewUpdateBuilder(ctx context.Context) ffapi.UpdateBuilder {
+	if c.QueryFactory == nil {
+		return nil
+	}
+	return c.QueryFactory.NewUpdate(ctx)
 }
 
 func UUIDValidator(ctx context.Context, idStr string) error {
