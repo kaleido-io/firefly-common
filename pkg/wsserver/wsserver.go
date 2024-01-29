@@ -164,7 +164,6 @@ func (s *webSocketServer) RoundTrip(ctx context.Context, stream string, payload 
 		}
 		// Do a round-robbin pick of one of the connections
 		conn := ss.conns[ss.wlmCounter%int64(len(ss.conns))]
-		ss.wlmCounter++
 		// The wlmCounter is used as the batch number in the payload
 		payload.SetBatchNumber(ss.wlmCounter)
 		rt = &roundTrip{
@@ -216,6 +215,7 @@ func (s *webSocketServer) completeRoundTrip(stream string, msg *WebSocketCommand
 	}
 	rt.response = msg
 	rt.err = err
+	ss.wlmCounter++
 	close(rt.done)
 	// We are NOT responsible for clearing ss.inflight - that is the RoundTrip() function's job
 }
@@ -248,7 +248,7 @@ func (s *webSocketServer) streamStarted(c *webSocketConnection, stream string) {
 	defer s.mux.Unlock()
 	ss := s.streamMap[stream]
 	if ss == nil {
-		ss = &streamState{}
+		ss = &streamState{wlmCounter: 1}
 		s.streamMap[stream] = ss
 	}
 	// Ignore duplicate starts on the same connection
