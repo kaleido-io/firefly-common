@@ -33,6 +33,7 @@ import (
 	"github.com/hyperledger/firefly-common/pkg/ffapi"
 	"github.com/hyperledger/firefly-common/pkg/fftypes"
 	"github.com/hyperledger/firefly-common/pkg/i18n"
+	"github.com/hyperledger/firefly-common/pkg/metric"
 	"github.com/hyperledger/firefly-common/pkg/log"
 	"github.com/sirupsen/logrus"
 )
@@ -49,6 +50,13 @@ type Config struct {
 	URL string `json:"httpURL,omitempty"`
 	HTTPConfig
 }
+
+var (
+	metricsManager metric.MetricsManager
+	onErrorHooks []func(*resty.Request, error)
+	onSuccessHooks []func(*resty.Client, *resty.Response)
+)
+
 
 // HTTPConfig is all the optional configuration separate to the URL you wish to invoke.
 // This is JSON serializable with docs, so you can embed it into API objects.
@@ -77,6 +85,43 @@ type HTTPConfig struct {
 	OnBeforeRequest               func(req *resty.Request) error            `json:"-"` // called before each request, even retry
 }
 
+func EnableClientMetrics(ctx context.Context, metricsRegistry metric.MetricsRegistry) error {
+	//create a metrics manager
+	mm, err := metricsRegistry.NewMetricsManagerForSubsystem(ctx, "ffresty")
+	if err != nil {
+		return err
+	}
+
+	metricsManager := mm
+	metricsManager.NewCounterMetricWithLabels(ctx, "http_response", "HTTP response", []string{"status","error"}, false)
+ 	metricsManager.NewCounterMetricWithLabels(ctx, "network_error", "Network error", []string{}, false)
+
+	//create hooks
+	onErrorMetricsHook := func(req *resty.Request, err error){
+		if v, ok := err.(*resty.ResponseError); ok {
+			code := v.Response.StatusCode
+			metricsManager.IncCounterMetricWithLabels(ctx, "http_response", map[string]string{"status": fmt.Sprintf("%d",code), "error": "true"}, nil)
+		}
+		metricsManager.IncCounterMetricWithLabels(ctx, "network_error", map[string]string{}, nil)
+	}
+	RegisterGlobalOnError(onErrorMetricsHook)
+
+	onSuccessMetricsHook := func(c *resty.Client, resp *resty.Response){
+		code := resp.StatusCode
+		metricsManager.IncCounterMetricWithLabels(ctx, "http_response", map[string]string{"status": fmt.Sprintf("%d",code), "error": "false"}, nil)
+	}
+	RegisterGlobalOnSuccess(onSuccessMetricsHook)
+	return nil
+}
+
+func RegisterGlobalOnError(onError func(req *resty.Request, err error)) {
+	onErrorHooks = append(onErrorHooks, onError)
+}
+
+func RegisterGlobalOnSuccess(onSuccess func(c *resty.Client, resp *resty.Response)) {
+	onSuccessHooks = append(onSuccessHooks, onSuccess)
+}
+
 // OnAfterResponse when using SetDoNotParseResponse(true) for streaming binary replies,
 // the caller should invoke ffresty.OnAfterResponse on the response manually.
 // The middleware is disabled on this path :-(
@@ -94,6 +139,19 @@ func OnAfterResponse(c *resty.Client, resp *resty.Response) {
 		level = logrus.ErrorLevel
 	}
 	log.L(rCtx).Logf(level, "<== %s %s [%d] (%.2fms)", resp.Request.Method, resp.Request.URL, status, elapsed)
+}
+
+
+func OnError(req *resty.Request, err error) {
+	for _, hook := range onErrorHooks {
+		hook(req,err)
+	}
+}
+
+func OnSuccess(c *resty.Client, resp *resty.Response) {
+	for _, hook := range onSuccessHooks {
+		hook(c,resp)
+	}
 }
 
 // New creates a new Resty client, using static configuration (from the config file)
@@ -204,8 +262,10 @@ func NewWithConfig(ctx context.Context, ffrestyConfig Config) (client *resty.Cli
 	})
 
 	// Note that callers using SetNotParseResponse will need to invoke this themselves
-
 	client.OnAfterResponse(func(c *resty.Client, r *resty.Response) error { OnAfterResponse(c, r); return nil })
+
+	client.OnError( func(req *resty.Request, e error) { OnError(req, e); return })
+	client.OnSuccess(func(c *resty.Client, r *resty.Response) { OnSuccess(c, r); return })
 
 	for k, v := range ffrestyConfig.HTTPHeaders {
 		if vs, ok := v.(string); ok {
