@@ -26,8 +26,8 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gorilla/mux"
 	"github.com/hyperledger/firefly-common/pkg/config"
@@ -118,16 +118,16 @@ func NewAPIServer[T any](ctx context.Context, options APIServerOptions[T]) APISe
 	}
 
 	as := &apiServer[T]{
-		defaultFilterLimit:        options.APIConfig.GetUint64(ConfAPIDefaultFilterLimit),
-		maxFilterLimit:            options.APIConfig.GetUint64(ConfAPIMaxFilterLimit),
-		maxFilterSkip:             options.APIConfig.GetUint64(ConfAPIMaxFilterSkip),
-		requestTimeout:            options.APIConfig.GetDuration(ConfAPIRequestTimeout),
-		requestMaxTimeout:         options.APIConfig.GetDuration(ConfAPIRequestMaxTimeout),
-		monitoringEnabled:         options.MonitoringConfig.GetBool(ConfMonitoringServerEnabled),
-		goProcessMetricsEnabled:   options.MonitoringConfig.GetBool(ConfMonitoringGoProcessMetricsEnabled),
-		metricsPath:               options.MonitoringConfig.GetString(ConfMonitoringServerMetricsPath),
-		livenessPath:              options.MonitoringConfig.GetString(ConfMonitoringServerLivenessPath),
-		loggingPath:               options.MonitoringConfig.GetString(ConfMonitoringServerLoggingPath),
+		defaultFilterLimit:      options.APIConfig.GetUint64(ConfAPIDefaultFilterLimit),
+		maxFilterLimit:          options.APIConfig.GetUint64(ConfAPIMaxFilterLimit),
+		maxFilterSkip:           options.APIConfig.GetUint64(ConfAPIMaxFilterSkip),
+		requestTimeout:          options.APIConfig.GetDuration(ConfAPIRequestTimeout),
+		requestMaxTimeout:       options.APIConfig.GetDuration(ConfAPIRequestMaxTimeout),
+		monitoringEnabled:       options.MonitoringConfig.GetBool(ConfMonitoringServerEnabled),
+		goProcessMetricsEnabled: options.MonitoringConfig.GetBool(ConfMonitoringGoProcessMetricsEnabled),
+		metricsPath:             options.MonitoringConfig.GetString(ConfMonitoringServerMetricsPath),
+		livenessPath:            options.MonitoringConfig.GetString(ConfMonitoringServerLivenessPath),
+		loggingPath:             options.MonitoringConfig.GetString(ConfMonitoringServerLoggingPath),
 
 		alwaysPaginate:            options.APIConfig.GetBool(ConfAPIAlwaysPaginate),
 		handleYAML:                options.HandleYAML,
