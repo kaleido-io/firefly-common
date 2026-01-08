@@ -51,6 +51,7 @@ func InitAPIServerConfig(apiConfig, monitoringConfig, corsConfig config.Section)
 
 	httpserver.InitHTTPConfig(monitoringConfig, 6000)
 	monitoringConfig.AddKnownKey(ConfMonitoringServerEnabled, true)
+	monitoringConfig.AddKnownKey(ConfMonitoringGoProcessMetricsEnabled, false)
 	monitoringConfig.AddKnownKey(ConfMonitoringServerMetricsPath, "/metrics")
 	monitoringConfig.AddKnownKey(ConfMonitoringServerLivenessPath, "/livez")
 	monitoringConfig.AddKnownKey(ConfMonitoringServerLoggingPath, "/logging")
