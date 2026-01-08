@@ -26,6 +26,7 @@ var (
 	ConfMonitoringServerMetricsPath  = "metricsPath"
 	ConfMonitoringServerLivenessPath = "livenessPath"
 	ConfMonitoringServerLoggingPath  = "loggingPath"
+	ConfMonitoringGoProcessMetricsEnabled = "goProcessMetricsEnabled"
 
 	ConfAPIDefaultFilterLimit     = "defaultFilterLimit"
 	ConfAPIMaxFilterLimit         = "maxFilterLimit"
