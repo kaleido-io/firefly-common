@@ -604,7 +604,7 @@ func TestPanicOnUnresolvedOneOfsInInput(t *testing.T) {
 		},
 	}
 
-	assert.PanicsWithValue(t, "invalid schema: ffoneof references unregistered schema: TestOneOfA", func() {
+	assert.PanicsWithValue(t, "invalid schema: FF00258: ffoneof references unregistered schema: TestOneOfA", func() {
 		_ = NewSwaggerGen(&SwaggerGenOptions{
 			Title:                   "TestPanicOnUnresolvedOneOfsInInput",
 			Version:                 "1.0",
@@ -626,7 +626,7 @@ func TestPanicOnUnresolvedOneOfsInOutput(t *testing.T) {
 		},
 	}
 
-	assert.PanicsWithValue(t, "invalid schema: ffoneof references unregistered schema: TestOneOfA", func() {
+	assert.PanicsWithValue(t, "invalid schema: FF00258: ffoneof references unregistered schema: TestOneOfA", func() {
 		_ = NewSwaggerGen(&SwaggerGenOptions{
 			Title:                   "TestPanicOnUnresolvedOneOfsInOutput",
 			Version:                 "1.0",
@@ -876,7 +876,7 @@ func TestPanicIfRegisteredSchemaHasUnresolvedOneofs(t *testing.T) {
 	RegisterSchemaType("UnresolvableOneOf", &UnresolvableOneOf{})
 	defer UnregisterSchemaType("UnresolvableOneOf")
 
-	assert.PanicsWithValue(t, "invalid schema registration for UnresolvableOneOf: ffoneof references unregistered schema: doesNotExist", func() {
+	assert.PanicsWithValue(t, "invalid schema registration for UnresolvableOneOf: FF00258: ffoneof references unregistered schema: doesNotExist", func() {
 		_ = NewSwaggerGen(&SwaggerGenOptions{
 			Title:                   "TestOneOfTags",
 			Version:                 "1.0",

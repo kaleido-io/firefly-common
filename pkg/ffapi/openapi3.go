@@ -334,7 +334,7 @@ func (sg *SwaggerGen) applyOneOfTag(ctx context.Context, tag reflect.StructTag, 
 	for _, name := range names {
 		registeredSchemaType, ok := getRegisteredSchemaType(name)
 		if !ok && sg.options.PanicOnUnresolvedOneOfs {
-			return fmt.Errorf("ffoneof references unregistered schema: %s", name)
+			return i18n.NewError(ctx, i18n.MsgFFOneOfReferencesUnregisteredSchema, name)
 		}
 		if ok {
 			sg.addRegisteredSchemaType(ctx, componentSchemas, name, registeredSchemaType)
