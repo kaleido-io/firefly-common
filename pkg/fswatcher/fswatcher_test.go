@@ -111,8 +111,7 @@ func TestFileListenerLogError(t *testing.T) {
 }
 
 // A constant stream of fs events on the watched directory (arriving faster than the re-sync
-// interval) must not starve the re-sync. Prior to using a ticker, the time.After was re-created
-// on every loop iteration, so each event reset the countdown and onSync never fired.
+// interval) must not starve the re-sync.
 func TestFileListenerResyncNotStarvedByEvents(t *testing.T) {
 
 	logrus.SetLevel(logrus.DebugLevel)
