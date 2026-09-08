@@ -79,6 +79,11 @@ func fsListenerLoop(ctx context.Context, fullFilePath string, onChange, onClose,
 	}
 	log.L(ctx).Debugf("re-sync interval set to '%s'", *timeout)
 
+	// A single ticker gives a constant re-sync cadence regardless of how busy the watched
+	// directory is.
+	resyncTicker := time.NewTicker(*timeout)
+	defer resyncTicker.Stop()
+
 	var lastHash *fftypes.Bytes32
 	for {
 		select {
@@ -103,7 +108,7 @@ func fsListenerLoop(ctx context.Context, fullFilePath string, onChange, onClose,
 					lastHash = dataHash
 				}
 			}
-		case <-time.After(*timeout):
+		case <-resyncTicker.C:
 			if onSync != nil {
 				data, err := os.ReadFile(fullFilePath)
 				if err == nil {
