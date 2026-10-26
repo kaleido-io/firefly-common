@@ -29,7 +29,7 @@ import (
 // PostgreSQLMaxPlaceholders is the limit on bind parameters in one statement, set by the PostgreSQL wire protocol
 const PostgreSQLMaxPlaceholders = 65535
 
-// DefaultPostgreSQLProviderFeatures are the features shared by PostgreSQL providers, which can add their own on top
+// DefaultPostgreSQLProviderFeatures are the features suggested for all PostgreSQL providers, clients can add their own on top
 func DefaultPostgreSQLProviderFeatures() SQLFeatures {
 	features := DefaultSQLProviderFeatures()
 	features.PlaceholderFormat = sq.Dollar
